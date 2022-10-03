@@ -1,9 +1,11 @@
 . "$PSScriptRoot\meteo.ps1"
 
-for ($year = 2022; $year -lt 2023 ; $year++) {
-    for ($month = 7; $month -lt 13; $month++) {
-        Start-Sleep -Seconds 0.5 # don't DDoS Meteo France's servers
+$destDir = "$PSScriptRoot\..\Data\"
 
-        Get-Meteo-File -year $year -month $month -destDir "$PSScriptRoot\..\Data\"
-    }
+$startDate = New-Object DateTime 2022, 1, 1
+$currentDate = Get-Date
+$downloadDate = $startDate
+while ($downloadDate.AddMonths(1) -lt $currentDate) {
+    Get-Meteo-File -year $downloadDate.Year -month $downloadDate.Month -destDir $destDir
+    $downloadDate = $downloadDate.AddMonths(1)
 }
