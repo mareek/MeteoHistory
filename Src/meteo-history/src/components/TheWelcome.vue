@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import WelcomeItem from './WelcomeItem.vue'
 import ToolingIcon from './icons/IconTooling.vue'
+import CsvViewer from './CsvViewer.vue'
 </script>
 
 <template>
+  <CsvViewer fileUrl="synop.199601.csv" separator=";" />
   <WelcomeItem>
     <template #icon>
       <ToolingIcon />
