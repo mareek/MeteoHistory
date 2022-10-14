@@ -4,7 +4,7 @@ import { computed, ref, onMounted } from "vue";
 const props = defineProps<{
     fileUrl: string,
     separator: string
-}>()
+}>();
 
 onMounted(async () => {
     const response = await fetch(props.fileUrl);
@@ -19,18 +19,16 @@ const rows = computed(() => fileLines.value?.slice(1).map(l => l.split(props.sep
 </script>
 
 <template>
-    <div>
-        <table>
-            <thead>
-                <tr>
-                    <th v-for="column in columns">{{column}}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="row in rows">
-                    <td v-for="val in row">{{val}}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <table>
+        <thead>
+            <tr>
+                <th v-for="column in columns">{{column}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="row in rows">
+                <td v-for="val in row">{{val}}</td>
+            </tr>
+        </tbody>
+    </table>
 </template>

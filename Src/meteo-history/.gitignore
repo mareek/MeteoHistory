@@ -26,3 +26,8 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+
+# Data
+/public/data/*
+!/public/data/Columns.ini
+!/public/data/postesSynop.json

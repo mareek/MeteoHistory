@@ -2,10 +2,12 @@
 import WelcomeItem from './WelcomeItem.vue'
 import ToolingIcon from './icons/IconTooling.vue'
 import CsvViewer from './CsvViewer.vue'
+import StationSelector from './StationSelector.vue'
 </script>
 
 <template>
-  <CsvViewer fileUrl="synop.199601.csv" separator=";" />
+  <StationSelector selectedStationId="" sourceFileUrl="data/postesSynop.json"/>
+  <CsvViewer fileUrl="data/07005/synop.199601.csv" separator=";" />
   <WelcomeItem>
     <template #icon>
       <ToolingIcon />
