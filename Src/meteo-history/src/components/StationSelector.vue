@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watchEffect } from "vue";
 import type { FeatureCollection, Station } from "../data/meteoFranceTypes";
 
 const props = defineProps<{
-    selectedStationId: string | undefined,
+    selectedStation: Station | undefined,
     sourceFileUrl: string
 }>();
 
@@ -15,13 +15,23 @@ onMounted(async () => {
     stations.value = readStations;
 });
 
-const stations = ref<Station[]>();
+const stations = ref<Station[]>([]);
+const selectedStationId = ref<string>();
 
+const emit = defineEmits(['update:selectedStation'])
+
+watchEffect(() => {
+    if (selectedStationId.value && stations.value && stations.value.length) {
+        const station = stations.value.find(s => s.ID === selectedStationId.value)
+        emit('update:selectedStation', station)
+    } else {
+        emit('update:selectedStation', null)
+    }
+});
 </script>
 
 <template>
     <select v-model="selectedStationId">
         <option v-for="station in stations" :value="station.ID">{{station.Nom}}</option>
     </select>
-    <span>{{selectedStationId}}</span>
 </template>

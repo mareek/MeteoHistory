@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from "vue";
+import { computed, ref, watchEffect } from "vue";
 
 const props = defineProps<{
-    fileUrl: string,
+    fileUrl: string | null,
     separator: string
 }>();
 
-onMounted(async () => {
-    const response = await fetch(props.fileUrl);
-    fileContent.value = await response.text();
+watchEffect(async () => {
+    if (props.fileUrl) {
+        const response = await fetch(props.fileUrl);
+        fileContent.value = await response.text();
+    }
 });
 
 const fileContent = ref<string>();

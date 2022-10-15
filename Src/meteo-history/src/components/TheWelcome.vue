@@ -1,13 +1,20 @@
 <script setup lang="ts">
+import { ref, computed } from "vue"
+import type { Station } from "@/data/meteoFranceTypes"
 import WelcomeItem from './WelcomeItem.vue'
 import ToolingIcon from './icons/IconTooling.vue'
 import CsvViewer from './CsvViewer.vue'
 import StationSelector from './StationSelector.vue'
+
+const selectedStation = ref<Station>();
+const csvFileUrl = computed(() => selectedStation.value 
+                                      ? `data/${selectedStation.value.ID}/synop.202001.csv` 
+                                      : null);
 </script>
 
 <template>
-  <StationSelector selectedStationId="" sourceFileUrl="data/postesSynop.json"/>
-  <CsvViewer fileUrl="data/07005/synop.199601.csv" separator=";" />
+  <StationSelector v-model:selectedStation="selectedStation" sourceFileUrl="data/postesSynop.json" />
+  <CsvViewer :fileUrl="csvFileUrl" separator=";" />
   <WelcomeItem>
     <template #icon>
       <ToolingIcon />
