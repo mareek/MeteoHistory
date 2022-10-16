@@ -36,14 +36,13 @@ function parseLine(line: string, separator: string): string[] {
     const cells: string[] = [];
     let cellStart = 0;
     while (cellStart < (line.length - 1)) {
-        const cellFirstChar = line.charAt(cellStart);
-        const isQuotedCell = cellFirstChar === '"';
+        const isQuotedCell = line.charAt(cellStart) === '"';
         const cellLastChar = isQuotedCell ? '"' : separator;
         const cellValueStartPos = isQuotedCell ? cellStart + 1 : cellStart;
         let cellLastCharPos = line.indexOf(cellLastChar, cellValueStartPos);
-        cellLastCharPos = cellLastCharPos < cellValueStartPos ? line.length : cellLastCharPos;
-        const cellValue = line.substring(cellValueStartPos, cellLastCharPos);
-        cells.push(cellValue);
+        cellLastCharPos = cellLastCharPos < 0 ? line.length : cellLastCharPos;
+
+        cells.push(line.substring(cellValueStartPos, cellLastCharPos));
 
         cellStart = cellLastCharPos + (isQuotedCell ? 2 : 1);
     }
