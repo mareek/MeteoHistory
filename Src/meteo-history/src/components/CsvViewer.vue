@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect } from "vue";
+import { parseCsv } from "../utils/csvParser";
+import type { CsvFile } from "../utils/csvParser";
 
 const props = defineProps<{
     fileUrl: string | null,
@@ -9,14 +11,15 @@ const props = defineProps<{
 watchEffect(async () => {
     if (props.fileUrl) {
         const response = await fetch(props.fileUrl);
-        fileContent.value = await response.text();
+        const content = await response.text();
+        csvFile.value = parseCsv(content, props.separator);
     }
 });
 
-const fileContent = ref<string>();
-const fileLines = computed(() => fileContent.value?.split('\n').slice(0, 100));
-const columns = computed(() => fileLines.value && fileLines.value[0].split(props.separator));
-const rows = computed(() => fileLines.value?.slice(1).map(l => l.split(props.separator)));
+const csvFile = ref<CsvFile>();
+
+const columns = computed(() => csvFile.value ? csvFile.value.columns : []);
+const rows = computed(() => csvFile.value ? csvFile.value.rows : []);
 
 </script>
 
@@ -24,12 +27,12 @@ const rows = computed(() => fileLines.value?.slice(1).map(l => l.split(props.sep
     <table>
         <thead>
             <tr>
-                <th v-for="column in columns">{{column}}</th>
+                <th v-for="column in columns">{{column.name}}</th>
             </tr>
         </thead>
         <tbody>
             <tr v-for="row in rows">
-                <td v-for="val in row">{{val}}</td>
+                <td v-for="cell in row.cells">{{cell.value}}</td>
             </tr>
         </tbody>
     </table>
