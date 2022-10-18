@@ -11,7 +11,7 @@ export interface Geometry {
 }
 
 export interface Feature {
-    properties : Station,
+    properties: Station,
     geometry: Geometry
 }
 
@@ -20,7 +20,8 @@ export interface FeatureCollection {
 }
 
 export interface SynopMeasure {
-    date:Date,
+    stationId: string,
+    date: Date,
     temperature: number,
     seaLevelPressure: number,
     windSpeed: number,
