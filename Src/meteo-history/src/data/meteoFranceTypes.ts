@@ -18,3 +18,12 @@ export interface Feature {
 export interface FeatureCollection {
     features: Feature[]
 }
+
+export interface SynopMeasure {
+    date:Date,
+    temperature: number,
+    seaLevelPressure: number,
+    windSpeed: number,
+    humidity: number,
+    visibility: number
+}

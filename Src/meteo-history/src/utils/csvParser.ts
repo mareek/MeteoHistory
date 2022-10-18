@@ -8,8 +8,21 @@ interface CsvCell {
     value: string
 }
 
-interface CsvRow {
-    cells: CsvCell[]
+class CsvRow {
+    cells: CsvCell[] = [];
+
+    constructor(cells: CsvCell[]) {
+        this.cells = cells;
+    }
+
+    getCell(columnName: string): CsvCell | null {
+        return this.cells.find(c => c.column.name === columnName) ?? null;
+    }
+
+    getCellValue(columnName: string): string | null {
+        const cell = this.getCell(columnName);
+        return cell ? cell.value : null;
+    }
 }
 
 interface CsvFile {
@@ -23,7 +36,7 @@ function parseCsv(fileContent: string, separator: string): CsvFile {
     const columns = parseLine(lines[0], separator).map((v, i): CsvColumn => ({ order: i, name: v }));
     const rows: CsvRow[] = lines.slice(1).map(line => {
         const values = parseLine(line, separator);
-        return { cells: columns.map((c, i) => ({ column: c, value: values[i] })) };
+        return new CsvRow(columns.map((c, i) => ({ column: c, value: values[i] })));
     });
 
     return {
@@ -51,4 +64,4 @@ function parseLine(line: string, separator: string): string[] {
 }
 
 export { parseCsv }
-export type { CsvFile }
+export type { CsvFile, CsvRow }
