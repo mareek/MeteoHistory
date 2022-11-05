@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect } from "vue";
-import { parseCsv } from "../utils/csvParser";
-import type { CsvFile } from "../utils/csvParser";
+import { parseCsv } from "@/utils/csvParser";
+import type { CsvFile } from "@/utils/csvParser";
 
 const props = defineProps<{
     fileUrl: string | null,
@@ -15,7 +15,7 @@ watchEffect(async () => {
     const response = await fetch(props.fileUrl);
     if (!response.ok) 
         return;
-        
+
     const content = await response.text();
     csvFile.value = parseCsv(content, props.separator);
 });

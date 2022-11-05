@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watchEffect } from "vue";
-import type { FeatureCollection, Station } from "../data/meteoFranceTypes";
+import type { FeatureCollection, Station } from "@/data/meteoFranceTypes";
 
 const props = defineProps<{
     selectedStation: Station | undefined,

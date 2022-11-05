@@ -5,6 +5,7 @@ import WelcomeItem from './WelcomeItem.vue'
 import ToolingIcon from './icons/IconTooling.vue'
 import CsvViewer from './CsvViewer.vue'
 import StationSelector from './StationSelector.vue'
+import TemperatureHistoryViewerVue from "./TemperatureHistoryViewer.vue"
 
 const selectedStation = ref<Station>();
 const csvFileUrl = computed(() => selectedStation.value 
@@ -13,8 +14,12 @@ const csvFileUrl = computed(() => selectedStation.value
 </script>
 
 <template>
+
   <StationSelector v-model:selectedStation="selectedStation" sourceFileUrl="data/postesSynop.json" />
-  <CsvViewer :fileUrl="csvFileUrl" separator=";" />
+  <TemperatureHistoryViewerVue :selected-station="selectedStation"/>
+  <!--
+    <CsvViewer :fileUrl="csvFileUrl" separator=";" />
+  -->
   <WelcomeItem>
     <template #icon>
       <ToolingIcon />

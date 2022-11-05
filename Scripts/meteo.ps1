@@ -17,7 +17,7 @@ Function Get-Meteo-File {
     $csvFilePath = Join-Path $destDir $csvFileName
 
     if ((-not $overwrite) -and (Test-Path $csvFilePath)) {
-        return $csvFilePath
+        return 
     }
 
     New-Directory-If-Not-Exists $destDir
