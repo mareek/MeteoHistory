@@ -2,9 +2,14 @@
 import { computed } from 'vue';
 import { Line as LineChart } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, LinearScale, PointElement, CategoryScale } from 'chart.js';
+import type { ChartDataset } from 'chart.js';
 import type { temperatureSerie } from '@/data/meteoTypes';
 
 ChartJS.register(Title, Tooltip, Legend, LineElement, LinearScale, PointElement, CategoryScale);
+const minForegroundColor = 'Blue';
+const maxForegroundColor = 'Red';
+const minBackgroundColor = 'rgba(0, 0, 255, 0.25)';
+const maxBackgroundColor = 'rgba(255, 0, 0, 0.25)';
 
 const props = defineProps<{
     backgroundTemperatures: temperatureSerie[],
@@ -17,16 +22,16 @@ const labels = computed(() =>
         .dailyTemperatures
         .map(dt => `${dt.day}-${dt.month}`));
 
-function CreateDatasets(serie: temperatureSerie, isForeground: boolean) {
-    const datasetMin = {
+function CreateDatasets(serie: temperatureSerie, isForeground: boolean): ChartDataset[] {
+    const datasetMin: ChartDataset = {
         label: `${serie.label} Min`,
-        borderColor: isForeground ? 'Blue' : 'Aquamarine',
+        borderColor: isForeground ? minForegroundColor : minBackgroundColor,
         data: serie.dailyTemperatures.map(d => d.min)
     };
 
-    const datasetMax = {
+    const datasetMax: ChartDataset = {
         label: `${serie.label} Max`,
-        borderColor: isForeground ? 'Red' : 'Bisque',
+        borderColor: isForeground ? maxForegroundColor : maxBackgroundColor,
         data: serie.dailyTemperatures.map(d => d.max)
     };
 
@@ -49,13 +54,25 @@ const chartData = computed((): any => ({
 
 const chartOptions: any = {
     elements: {
-        line: { tension: 0.3 },
+        line: {
+            tension: 0.3,
+            borderWidth: 7,
+        },
         point: { pointRadius: 0 }
     },
+    plugins: { legend: { display: false } },
+    maintainAspectRatio: false
 }
 
 </script>
 
 <template>
-    <LineChart :chart-data="chartData" :chart-options="chartOptions" />
+    <LineChart class="chart" :chart-data="chartData" :chart-options="chartOptions" />
 </template>
+
+<style>
+.chart {
+    width: 95vw;
+    height: 80vh;
+}
+</style>
