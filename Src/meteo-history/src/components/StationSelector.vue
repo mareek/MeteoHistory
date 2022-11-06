@@ -7,12 +7,17 @@ const props = defineProps<{
     sourceFileUrl: string
 }>();
 
+function isInFranceMetropolitaine(station: Station) {
+    return 41 < station.Latitude && station.Latitude < 51.1
+        && -6 < station.Longitude && station.Longitude < 10
+}
+
 onMounted(async () => {
     const response = await fetch(props.sourceFileUrl);
     const featureCollection: FeatureCollection = await response.json();
     const readStations = featureCollection.features.map(f => f.properties);
     readStations.sort((a, b) => a.Nom.localeCompare(b.Nom))
-    stations.value = readStations;
+    stations.value = readStations.filter(isInFranceMetropolitaine);
 });
 
 const stations = ref<Station[]>([]);
@@ -32,6 +37,6 @@ watchEffect(() => {
 
 <template>
     <select v-model="selectedStationId">
-        <option v-for="station in stations" :value="station.ID">{{station.Nom}}</option>
+        <option v-for="station in stations" :value="station.ID">{{ station.Nom }}</option>
     </select>
 </template>
