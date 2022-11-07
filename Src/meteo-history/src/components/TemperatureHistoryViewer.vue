@@ -5,7 +5,10 @@ import type { temperatureSerie } from '@/data/meteoTypes';
 import { downloadSeries } from "@/utils/serieHandler";
 import TemperatureChart from "./TemperatureChart.vue";
 
-const props = defineProps<{ selectedStation: Station | undefined }>();
+const props = defineProps<{
+    selectedStation: Station | undefined,
+    selectedDate: Date | undefined
+}>();
 
 const series = ref<temperatureSerie[]>([])
 
@@ -13,7 +16,7 @@ watchEffect(async () => {
     if (!props.selectedStation)
         return;
 
-    series.value = await downloadSeries(props.selectedStation, new Date());
+    series.value = await downloadSeries(props.selectedStation, props.selectedDate ?? new Date());
 });
 
 const backgroundSeries = computed(() => series.value.slice(0, -1));
