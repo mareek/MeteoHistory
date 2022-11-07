@@ -2,6 +2,8 @@
 import { ref, onMounted, watchEffect } from "vue";
 import type { FeatureCollection, Station } from "@/data/meteoFranceTypes";
 
+const defaultStationId = "07481"; // Lyon-St exupery
+
 const props = defineProps<{
     selectedStation: Station | undefined,
     sourceFileUrl: string
@@ -21,7 +23,7 @@ onMounted(async () => {
 });
 
 const stations = ref<Station[]>([]);
-const selectedStationId = ref<string>();
+const selectedStationId = ref<string>(defaultStationId);
 
 const emit = defineEmits(['update:selectedStation'])
 

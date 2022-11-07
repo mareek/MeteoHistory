@@ -8,7 +8,7 @@ interface dailyTemperature {
 
 interface temperatureSerie {
     label: string,
-    dailyTemperatures : dailyTemperature[]
+    dailyTemperatures: dailyTemperature[]
 }
 
 export type { dailyTemperature, temperatureSerie };
