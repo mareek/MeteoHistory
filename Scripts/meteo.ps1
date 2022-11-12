@@ -7,8 +7,8 @@ function New-Directory-If-Not-Exists {
     }
 }
 
-Function Get-Meteo-File {
-    Param([int]$year, [int]$month, [string]$destDir, [bool] $overwrite = ($false))
+function Get-Meteo-File {
+    param([int]$year, [int]$month, [string]$destDir, [bool] $overwrite = ($false))
     $csvFileName = "synop." + $year.ToString("0000") + $month.ToString("00") + ".csv"
     $gzFileName = $csvFileName + ".gz"
     $urlBase = "https://donneespubliques.meteofrance.fr/donnees_libres/Txt/Synop/Archive/"
@@ -49,8 +49,8 @@ Function Get-Meteo-File {
 }
 
 # This function is horribly slow and should be optimised, it took 90 minutes to process 320 files of ~4MB each
-Function Split-Meteo-File {
-    Param([string]$srcFile, [string]$destDir, [bool] $overwrite = ($false))
+function Split-Meteo-File {
+    param([string]$srcFile, [string]$destDir, [bool] $overwrite = ($false))
     
     $destDir = Split-Path $srcFile -Parent
     $srcFileName = Split-Path $srcFile -leaf
@@ -67,4 +67,19 @@ Function Split-Meteo-File {
             $stationLines | Export-Csv $stationFilePath ';' -NoTypeInformation
         }
     }
+}
+
+function Join-Monthly-Files-Into-Archive {
+    param([string]$dir, [int]$month, [bool] $overwrite = ($false))
+    $gzFileName = "synop." + $month.ToString("00") + ".csv.gz"
+    $gzFilePath = Join-Path $dir $gzFileName
+
+    if ((-not $overwrite) -and (Test-Path $gzFilePath)) {
+        return 
+    }
+
+    $searchPattern = Join-Path $dir ("synop.*"+ $month.ToString("00") + ".csv")
+    $filesToCompress = Get-ChildItem -Path $searchPattern
+    Write-Output ("Creating archive " + $gzFileName)
+    Compress-GZip-Files $filesToCompress  $gzFilePath
 }
