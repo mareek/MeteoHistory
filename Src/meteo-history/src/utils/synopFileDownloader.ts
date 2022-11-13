@@ -1,4 +1,5 @@
 import { parseCsv } from "./csvParser";
+import { decompressResponse } from "./gzip";
 import type { CsvRow } from "./csvParser";
 import type { SynopMeasure, Station } from "@/data/meteoFranceTypes";
 
@@ -41,14 +42,42 @@ function readSynopFile(csvFileContent: string): SynopMeasure[] {
 }
 
 async function downloadSynopFile(station: Station, year: number, month: number): Promise<SynopMeasure[] | undefined> {
-    const url = `data/${station.ID}/synop.${year}${month.toLocaleString(undefined, { minimumIntegerDigits: 2 })}.csv`;
+    const csvFileName = `synop.${year}${month.toLocaleString(undefined, { minimumIntegerDigits: 2 })}.csv`;
+    const url = `data/${station.ID}/${csvFileName}`;
     const response = await fetch(url);
     if (!response.ok)
         return undefined;
 
-    //Faire un truc où on télécharge le fichier directement depuis météo france si on ne le trouve pas en "local"
     const content = await response.text();
     return readSynopFile(content);
 }
 
-export { downloadSynopFile };
+async function downloadSynopMonthlyArchive(station: Station, month: number): Promise<SynopMeasure[] | undefined> {
+    const gzFileName = `synop.${month.toLocaleString(undefined, { minimumIntegerDigits: 2 })}.csv.gz`;
+    const url = `data/${station.ID}/${gzFileName}`;
+    const response = await fetch(url);
+    if (!response.ok)
+        return undefined;
+
+    const content = await response.text();
+    if (!content)
+        return undefined
+
+    return readSynopFile(content);
+}
+
+// This function does not work due to CORS on météo france's servers
+async function doawnloadSynopFileFromMeteoFrance(station: Station, csvFileName: string): Promise<SynopMeasure[] | undefined> {
+    const url = `https://donneespubliques.meteofrance.fr/donnees_libres/Txt/Synop/Archive/${csvFileName}.gz`
+
+    const response = await fetch(url, { mode: "cors" });
+    if (!response.ok)
+        return undefined;
+
+    const content = await decompressResponse(response);
+    if (!content)
+        return undefined
+
+    return readSynopFile(content).filter(s => s.stationId === station.ID);
+}
+export { downloadSynopFile, downloadSynopMonthlyArchive };

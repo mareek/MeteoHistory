@@ -1,6 +1,6 @@
 import type { Station, SynopMeasure } from "@/data/meteoFranceTypes";
 import type { temperatureSerie, dailyTemperature } from "@/data/meteoTypes";
-import { downloadSynopFile } from "@/utils/synopFileDownloader";
+import { downloadSynopFile, downloadSynopMonthlyArchive } from "@/utils/synopFileDownloader";
 import _ from "lodash";
 
 function createDailyTemperature(dailyMeasures: SynopMeasure[]): dailyTemperature {
@@ -21,9 +21,13 @@ function getDailyTemperatures(measures: SynopMeasure[]): dailyTemperature[] {
         .value();
 }
 
-async function createSerie(station: Station, year: number, month: number): Promise<temperatureSerie | undefined> {
-    const measures = await downloadSynopFile(station, year, month);
-    if (!measures)
+function createSeries(years: number[], measures: SynopMeasure[]): temperatureSerie[] {
+    return years.map(year => createSerie(year, measures.filter(m => m.date.getUTCFullYear() === year)))
+        .filter((serie): serie is temperatureSerie => !!serie)
+}
+
+function createSerie(year: number, measures: SynopMeasure[]): temperatureSerie | undefined {
+    if (!measures?.length)
         return undefined;
 
     return {
@@ -33,7 +37,7 @@ async function createSerie(station: Station, year: number, month: number): Promi
 }
 
 function getYears(currentDate: Date): number[] {
-    const lastYear = currentDate.getUTCFullYear();
+    const lastYear = currentDate.getFullYear();
     const result = [];
     for (let year = 1996; year <= lastYear; year++) {
         result.push(year);
@@ -42,19 +46,37 @@ function getYears(currentDate: Date): number[] {
 }
 
 async function downloadSeries(station: Station, currentDate: Date): Promise<temperatureSerie[]> {
-    const month = currentDate.getUTCMonth() + 1;
-    const promises = getYears(currentDate).map(y => createSerie(station, y, month));
+    const month = currentDate.getMonth() + 1;
+    const years = getYears(currentDate);
+    const result = await downloadSeriesByArchive(station, month, years);
+    if (!!result)
+        return result;
+
+    return await downloadSeriesByFile(station, month, years);
+}
+
+async function downloadSeriesByFile(station: Station, month: number, years: number[]): Promise<temperatureSerie[]> {
+    const promises = years.map(y => downloadSynopFile(station, y, month));
 
     await Promise.all(promises);
 
-    const result = [];
+    const measures: SynopMeasure[] = [];
     for (let i = 0; i < promises.length; i++) {
         const serie = await promises[i];
         if (serie) {
-            result.push(serie);
+            measures.push(...serie);
         }
     }
-    return result;
+    return createSeries(years, measures);
 }
+
+async function downloadSeriesByArchive(station: Station, month: number, years: number[]): Promise<temperatureSerie[] | undefined> {
+    const measures = await downloadSynopMonthlyArchive(station, month);
+    if (!measures)
+        return undefined;
+
+    return createSeries(years, measures);
+}
+
 
 export { downloadSeries };

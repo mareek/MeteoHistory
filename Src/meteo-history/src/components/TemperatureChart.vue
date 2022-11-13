@@ -75,5 +75,7 @@ const chartOptions: any = {
 .chart {
     width: 95vw;
     height: 80vh;
+    background-color: antiquewhite;
+    color: black;
 }
 </style>
