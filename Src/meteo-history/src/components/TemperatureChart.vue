@@ -8,8 +8,8 @@ import type { temperatureSerie } from '@/data/meteoTypes';
 ChartJS.register(Title, Tooltip, Legend, LineElement, LinearScale, PointElement, CategoryScale);
 const minForegroundColor = 'Blue';
 const maxForegroundColor = 'Red';
-const minBackgroundColor = 'rgba(0, 0, 255, 0.25)';
-const maxBackgroundColor = 'rgba(255, 0, 0, 0.25)';
+const minBackgroundColor = 'rgba(0, 25, 255, 0.25)';
+const maxBackgroundColor = 'rgba(255, 25, 0, 0.25)';
 
 const props = defineProps<{
     backgroundTemperatures: temperatureSerie[],
@@ -58,10 +58,11 @@ const chartOptions: any = {
             tension: 0.3,
             borderWidth: 7,
         },
-        point: { pointRadius: 0 }
+        point: { pointRadius: 5 }
     },
     plugins: { legend: { display: false } },
-    maintainAspectRatio: false
+    maintainAspectRatio: false,
+    animation: { duration: 0 }
 }
 
 </script>
