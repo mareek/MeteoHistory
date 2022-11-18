@@ -20,7 +20,7 @@ const labels = computed(() =>
     props.backgroundTemperatures?.length
     && props.backgroundTemperatures[0]
         .dailyTemperatures
-        .map(dt => `${dt.day}-${dt.month}`));
+        .map(dt => new Date(2000, dt.month - 1, dt.day).toLocaleString('default', { day: "numeric", month: 'long' })));
 
 function CreateDatasets(serie: temperatureSerie, isForeground: boolean): ChartDataset[] {
     const datasetMin: ChartDataset = {
