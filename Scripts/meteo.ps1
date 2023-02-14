@@ -22,26 +22,26 @@ function Get-Meteo-File {
 
     New-Directory-If-Not-Exists $destDir
 
-    Write-Output ("Downloading " + $url)
+    Write-Host ("Downloading " + $url)
     try { 
         Invoke-WebRequest -Uri $url -OutFile $gzFilePath 
         Start-Sleep -Milliseconds 500 # don't DDoS Meteo France's servers
     }
     catch { 
-        Write-Output "Error during download :"
-        Write-Output $_
+        Write-Host "Error during download :"
+        Write-Host $_
         try { Remove-Item $gzFilePath } catch { }
         return 
     }
 
-    Write-Output ("decompressing " + $gzFileName)
+    Write-Host ("decompressing " + $gzFileName)
     try { 
         Expand-GZip-File $gzFilePath $csvFilePath 
-        return $csvFilePath
+        return
     }
     catch { 
-        Write-Output "Error during decompression :"
-        Write-Output $_
+        Write-Host "Error during decompression :"
+        Write-Host $_
         try { Remove-Item $csvFilePath } catch { }
         return 
     }
@@ -49,21 +49,23 @@ function Get-Meteo-File {
 }
 
 # This function is horribly slow and should be optimised, it took 90 minutes to process 320 files of ~4MB each
-function Split-Meteo-File {
-    param([string]$srcFile, [string]$destDir, [bool] $overwrite = ($false))
+# It is not faster now but at least it doesn't overwrite existing files
+function  Split-Meteo-File {
+    param([object[]]$stations, [string]$srcFile, [string]$destDir, [bool] $overwrite = ($false))
     
     $destDir = Split-Path $srcFile -Parent
     $srcFileName = Split-Path $srcFile -leaf
-    $csvFile = Import-Csv $srcFile -Delimiter ';'
-    $stations = $csvFile | Select-Object -Property "numer_sta" -Unique
     foreach ($station in $stations) {
-        $stationId = $station.numer_sta
-        $stationFileDir = Join-Path $destDir $stationId
+        $stationFileDir = Join-Path $destDir $station.ID
         $stationFilePath = Join-Path $stationFileDir $srcFileName
 
         if ($overwrite -or -not (Test-Path($stationFilePath))) {
+            if ($null -eq $csvFileContent) {
+                $csvFileContent = Import-Csv $srcFile -Delimiter ';'
+            }        
+            
             New-Directory-If-Not-Exists $stationFileDir
-            $stationLines = $csvFile | Where-Object -Property "numer_sta" -EQ -Value $stationId
+            $stationLines = $csvFileContent | Where-Object -Property "numer_sta" -EQ -Value $station.ID
             $stationLines | Export-Csv $stationFilePath ';' -NoTypeInformation
         }
     }
@@ -78,8 +80,8 @@ function Join-Monthly-Files-Into-Archive {
         return 
     }
 
-    $searchPattern = Join-Path $dir ("synop.*"+ $month.ToString("00") + ".csv")
+    $searchPattern = Join-Path $dir ("synop.*" + $month.ToString("00") + ".csv")
     $filesToCompress = Get-ChildItem -Path $searchPattern
-    Write-Output ("Creating archive " + $gzFileName)
+    Write-Host ("Creating archive " + $gzFileName)
     Compress-GZip-Files $filesToCompress  $gzFilePath
 }
