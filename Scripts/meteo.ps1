@@ -7,6 +7,15 @@ function New-Directory-If-Not-Exists {
     }
 }
 
+function Copy-File-If-Newer {
+    param ([System.IO.FileInfo]$srcFile, [string]$destDir)
+    $fileName = Split-Path $srcFile -leaf
+    $destFilePath = Join-Path $destDir $fileName
+    $destFile = Get-Item $destFilePath 
+    if (-not $destFile.Exists -or ($destFile.LastWriteTimeUtc -lt $srcFile.LastWriteTimeUtc)) {
+        Copy-Item $srcFile $destFilePath
+    }
+}
 function Get-Meteo-File {
     param([int]$year, [int]$month, [string]$destDir, [bool] $overwrite = ($false))
     $csvFileName = "synop." + $year.ToString("0000") + $month.ToString("00") + ".csv"
