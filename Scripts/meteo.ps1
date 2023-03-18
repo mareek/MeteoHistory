@@ -57,8 +57,6 @@ function Get-Meteo-File {
     finally { Remove-Item $gzFilePath }
 }
 
-# This function is horribly slow and should be optimised, it took 90 minutes to process 320 files of ~4MB each
-# It is not faster now but at least it doesn't overwrite existing files
 function  Split-Meteo-File {
     param([object[]]$stations, [string]$srcFile, [string]$destDir, [bool] $overwrite = ($false))
     
@@ -70,12 +68,16 @@ function  Split-Meteo-File {
 
         if ($overwrite -or -not (Test-Path($stationFilePath))) {
             if ($null -eq $csvFileContent) {
-                $csvFileContent = Import-Csv $srcFile -Delimiter ';'
-            }        
+                $csvFileContent = Get-Content -Path $srcFile | Group-Object -AsHashTable -Property { $_.Split(";")[0] }
+            }
             
             New-Directory-If-Not-Exists $stationFileDir
-            $stationLines = $csvFileContent | Where-Object -Property "numer_sta" -EQ -Value $station.ID
-            $stationLines | Export-Csv $stationFilePath ';' -NoTypeInformation
+            if ($csvFileContent.ContainsKey($station.ID)) {
+                $csvFileContent[$station.ID] | Out-File -FilePath $stationFilePath
+            } else {
+                #Create an empty file to speed up further passes
+                "" | Out-File -FilePath $stationFilePath
+            }
         }
     }
 }
