@@ -74,7 +74,8 @@ function  Split-Meteo-File {
             New-Directory-If-Not-Exists $stationFileDir
             if ($csvFileContent.ContainsKey($station.ID)) {
                 $csvFileContent[$station.ID] | Out-File -FilePath $stationFilePath
-            } else {
+            }
+            else {
                 #Create an empty file to speed up further passes
                 "" | Out-File -FilePath $stationFilePath
             }
@@ -87,12 +88,14 @@ function Join-Monthly-Files-Into-Archive {
     $gzFileName = "synop." + $month.ToString("00") + ".csv.gz"
     $gzFilePath = Join-Path $dir $gzFileName
 
-    if ((-not $overwrite) -and (Test-Path $gzFilePath)) {
-        return 
-    }
-
     $searchPattern = Join-Path $dir ("synop.*" + $month.ToString("00") + ".csv")
     $filesToCompress = Get-ChildItem -Path $searchPattern
-    Write-Host ("Creating archive " + $gzFileName)
-    Compress-GZip-Files $filesToCompress  $gzFilePath
+    $lastDownloadDate = ($filesToCompress | measure -Property LastWriteTimeUtc -Maximum).Maximum
+
+    if ($overwrite `
+        -or (-not (Test-Path $gzFilePath)) `
+        -or  (Get-Item $gzFilePath).LastWriteTimeUtc -lt $lastDownloadDate) {
+        Write-Host ("Creating archive " + $gzFileName)
+        Compress-GZip-Files $filesToCompress  $gzFilePath
+    }
 }
