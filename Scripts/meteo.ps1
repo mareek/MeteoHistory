@@ -1,6 +1,7 @@
 . "$PSScriptRoot\gzip.ps1"
 
-function New-Directory-If-Not-Exists {
+function New-Directory-If-Not-Exist {
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param ([string]$directory)
     if (-not (Test-Path $directory)) {
         New-Item $directory -ItemType Directory
@@ -29,7 +30,7 @@ function Get-Meteo-File {
         return 
     }
 
-    New-Directory-If-Not-Exists $destDir
+    New-Directory-If-Not-Exist $destDir
 
     Write-Host ("Downloading " + $url)
     try { 
@@ -68,10 +69,10 @@ function  Split-Meteo-File {
 
         if ($overwrite -or -not (Test-Path($stationFilePath))) {
             if ($null -eq $csvFileContent) {
-                $csvFileContent = Get-Content -Path $srcFile | Group-Object -AsHashTable -Property { $_.Split(";")[0] }
+                $csvFileContent = Get-Content -Path $srcFile | group -AsHashTable -Property { $_.Split(";")[0] }
             }
             
-            New-Directory-If-Not-Exists $stationFileDir
+            New-Directory-If-Not-Exist $stationFileDir
             if ($csvFileContent.ContainsKey($station.ID)) {
                 $csvFileContent[$station.ID] | Out-File -FilePath $stationFilePath
             }
