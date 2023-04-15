@@ -17,6 +17,7 @@ function Copy-File-If-Newer {
         Copy-Item $srcFile $destFilePath
     }
 }
+
 function Get-Meteo-File {
     param([int]$year, [int]$month, [string]$destDir, [bool] $overwrite = ($false))
     $csvFileName = "synop." + $year.ToString("0000") + $month.ToString("00") + ".csv"
@@ -61,7 +62,6 @@ function Get-Meteo-File {
 function  Split-Meteo-File {
     param([object[]]$stations, [string]$srcFile, [string]$destDir, [bool] $overwrite = ($false))
     
-    $destDir = Split-Path $srcFile -Parent
     $srcFileName = Split-Path $srcFile -leaf
     foreach ($station in $stations) {
         $stationFileDir = Join-Path $destDir $station.ID
