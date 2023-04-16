@@ -3,7 +3,7 @@
 $chronoTotal = [System.Diagnostics.Stopwatch]::StartNew()
 
 $dataDir = Join-Path $PSScriptRoot ".." "Data" -Resolve
-$archiveDir = Join-Path $dataDir "Archive"
+$archiveDir = Join-Path $dataDir "Archives"
 $stationsDir = Join-Path $dataDir "Stations"
 
 $startDate = New-Object DateTime 1996, 1, 1
@@ -15,7 +15,7 @@ $PreviousProgressPreference = $ProgressPreference
 $ProgressPreference = 'SilentlyContinue'
 $chronoDownload = [System.Diagnostics.Stopwatch]::StartNew()
 while ($downloadDate.AddMonths(1) -lt $currentDate) {
-    Get-Meteo-File -year $downloadDate.Year -month $downloadDate.Month -destDir $archiveDir
+    Get-Meteo-Archive -year $downloadDate.Year -month $downloadDate.Month -destDir $archiveDir
     $downloadDate = $downloadDate.AddMonths(1)
 }
 $chronoDownload.Stop()
@@ -25,13 +25,12 @@ $stationFilePath = Join-Path $dataDir "postesSynop.json"
 $stationJson = Get-Content $stationFilePath | ConvertFrom-Json
 $stations = $stationJson.features | select -ExpandProperty properties
 
-$searchPattern = Join-Path $archiveDir ("synop.*.csv")
-$csvFiles = Get-ChildItem -Path $searchPattern | sort LastWriteTime -Descending
+$csvFiles = Get-ChildItem -Path $archiveDir | sort LastWriteTime -Descending
 
 $chronoSplit = [System.Diagnostics.Stopwatch]::StartNew()
 foreach ($csvFile in $csvFiles) {
     Write-Host ("splitting " + $csvFile)
-    Split-Meteo-File $stations $csvFile $stationsDir
+    Split-Meteo-Archive $stations $csvFile $stationsDir
 }
 $chronoSplit.Stop()
 
@@ -52,7 +51,7 @@ foreach ($stationDir in Get-ChildItem $stationsDir -Directory) {
     $stationId = Split-Path $stationDir -Leaf
     Write-Host ("Copying monthly archives for station " + $stationId + " to final dir")
     $finalStationDir = Join-Path $finalDir $stationId
-    foreach ($monthlyArchiveFile in Get-ChildItem $stationDir -Filter *.gz) {
+    foreach ($monthlyArchiveFile in Get-ChildItem $stationDir -Filter "synop.??.csv.gz") {
         Copy-File-If-Newer $monthlyArchiveFile $finalStationDir
     }
 }

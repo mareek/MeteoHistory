@@ -18,16 +18,14 @@ function Copy-File-If-Newer {
     }
 }
 
-function Get-Meteo-File {
+function Get-Meteo-Archive {
     param([int]$year, [int]$month, [string]$destDir, [bool] $overwrite = ($false))
-    $csvFileName = "synop." + $year.ToString("0000") + $month.ToString("00") + ".csv"
-    $gzFileName = $csvFileName + ".gz"
+    $gzFileName = "synop." + $year.ToString("0000") + $month.ToString("00") + ".csv.gz"
     $urlBase = "https://donneespubliques.meteofrance.fr/donnees_libres/Txt/Synop/Archive/"
     $url = $urlBase + $gzFileName
     $gzFilePath = Join-Path $destDir $gzFileName
-    $csvFilePath = Join-Path $destDir $csvFileName
 
-    if ((-not $overwrite) -and (Test-Path $csvFilePath)) {
+    if ((-not $overwrite) -and (Test-Path $gzFilePath)) {
         return 
     }
 
@@ -44,22 +42,9 @@ function Get-Meteo-File {
         try { Remove-Item $gzFilePath } catch { }
         return 
     }
-
-    Write-Host ("decompressing " + $gzFileName)
-    try { 
-        Expand-GZip-File $gzFilePath $csvFilePath 
-        return
-    }
-    catch { 
-        Write-Host "Error during decompression :"
-        Write-Host $_
-        try { Remove-Item $csvFilePath } catch { }
-        return 
-    }
-    finally { Remove-Item $gzFilePath }
 }
 
-function  Split-Meteo-File {
+function  Split-Meteo-Archive {
     param([object[]]$stations, [string]$srcFile, [string]$destDir, [bool] $overwrite = ($false))
     
     $srcFileName = Split-Path $srcFile -leaf
@@ -69,16 +54,19 @@ function  Split-Meteo-File {
 
         if ($overwrite -or -not (Test-Path($stationFilePath))) {
             if ($null -eq $csvFileContent) {
-                $csvFileContent = Get-Content -Path $srcFile | group -AsHashTable -Property { $_.Split(";")[0] }
+                $unzipedSrcFile = $srcFile + ".tmp"
+                Expand-GZip-File $srcFile $unzipedSrcFile
+                $csvFileContent = Get-Content -Path $unzipedSrcFile | group -AsHashTable -Property { $_.Split(";")[0] }
+                Remove-Item $unzipedSrcFile
             }
             
             New-Directory-If-Not-Exist $stationFileDir
             if ($csvFileContent.ContainsKey($station.ID)) {
-                $csvFileContent[$station.ID] | Out-File -FilePath $stationFilePath
+                Out-GZip-File $csvFileContent[$station.ID] $stationFilePath
             }
             else {
                 #Create an empty file to speed up further passes
-                "" | Out-File -FilePath $stationFilePath
+                Out-GZip-File "" $stationFilePath
             }
         }
     }
@@ -89,7 +77,7 @@ function Join-Monthly-Files-Into-Archive {
     $gzFileName = "synop." + $month.ToString("00") + ".csv.gz"
     $gzFilePath = Join-Path $dir $gzFileName
 
-    $searchPattern = Join-Path $dir ("synop.*" + $month.ToString("00") + ".csv")
+    $searchPattern = Join-Path $dir ("synop.????" + $month.ToString("00") + ".csv.gz")
     $filesToCompress = Get-ChildItem -Path $searchPattern
     $lastDownloadDate = ($filesToCompress | measure -Property LastWriteTimeUtc -Maximum).Maximum
 
