@@ -5,13 +5,19 @@ $chronoTotal = [System.Diagnostics.Stopwatch]::StartNew()
 $dataDir = Join-Path $PSScriptRoot ".." "Data" -Resolve
 $archiveDir = Join-Path $dataDir "Archives"
 $stationsDir = Join-Path $dataDir "Stations"
+$currentMonthDir = Join-Path $dataDir "CurrentMonth"
+
+New-Directory-If-Not-Exist $dataDir
+New-Directory-If-Not-Exist $archiveDir
+New-Directory-If-Not-Exist $stationsDir
+New-Directory-If-Not-Exist $currentMonthDir
 
 $startDate = New-Object DateTime 1996, 1, 1
 $currentDate = Get-Date
 $downloadDate = $startDate
 
-$PreviousProgressPreference = $ProgressPreference
 # We don't want the progress bar to show up for each file downloaded
+$PreviousProgressPreference = $ProgressPreference
 $ProgressPreference = 'SilentlyContinue'
 $chronoDownload = [System.Diagnostics.Stopwatch]::StartNew()
 while ($downloadDate.AddMonths(1) -lt $currentDate) {
@@ -44,7 +50,7 @@ foreach ($stationDir in Get-ChildItem $stationsDir -Directory) {
 }
 $chronoArchive.Stop()
 
-$finalDir  = Join-Path $PSScriptRoot ".." "Src" "meteo-history" "public" "data" -Resolve
+$finalDir = Join-Path $PSScriptRoot ".." "Src" "meteo-history" "public" "data" -Resolve
 
 $chronoCopy = [System.Diagnostics.Stopwatch]::StartNew()
 foreach ($stationDir in Get-ChildItem $stationsDir -Directory) {
@@ -56,11 +62,37 @@ foreach ($stationDir in Get-ChildItem $stationsDir -Directory) {
     }
 }
 $chronoCopy.Stop()
+
+$chronoCurrentMonth = [System.Diagnostics.Stopwatch]::StartNew()
+# We don't want the progress bar to show up for each file downloaded
+$PreviousProgressPreference = $ProgressPreference
+$ProgressPreference = 'SilentlyContinue'
+Get-Meteo-Daily-Files -year $currentDate.Year -month $currentDate.Month  -currentDay $currentDate.Day -destDir $currentMonthDir
+$ProgressPreference = $PreviousProgressPreference
+
+$dailyArchiveFile = Join-Daily-Files-Into-Archive -year $currentDate.Year -month $currentDate.Month -currentDay $currentDate.Day -dir $currentMonthDir
+
+Write-Host ("Copying partial current month to final dir")
+Copy-File-If-Newer $dailyArchiveFile (Join-Path $finalDir "partial")
+
+Write-Host ("Cleanup previous daily files")
+$firstDayOfMonth = Get-Date -Year $currentDate.Year -Month $currentDate.Month -Day 1
+$candidateFilesToClean =  (Get-ChildItem $currentMonthDir -Filter "synop.??????*") + (Get-ChildItem (Join-Path $finalDir "partial") -Filter "synop.??????*")
+foreach ($dailyFiles in $candidateFilesToClean) {
+    $fileDate = Get-Date -Year $dailyFiles.Name.Substring(6, 4) -Month $dailyFiles.Name.Substring(10, 2) -Day 1
+    if ($fileDate -lt $firstDayOfMonth) {
+        $dailyFiles.Delete()
+    }
+}
+
+$chronoCurrentMonth.Stop()
+
 $chronoTotal.Stop()
 
-Write-Host ("Download : " + $chronoDownload.Elapsed)
-Write-Host ("Split    : " + $chronoSplit.Elapsed)
-Write-Host ("Archive  : " + $chronoArchive.Elapsed)
-Write-Host ("Copy     : " + $chronoCopy.Elapsed)
-Write-Host ("Total    : " + $chronoTotal.Elapsed)
+Write-Host ("Download      : " + $chronoDownload.Elapsed)
+Write-Host ("Split         : " + $chronoSplit.Elapsed)
+Write-Host ("Archive       : " + $chronoArchive.Elapsed)
+Write-Host ("Copy          : " + $chronoCopy.Elapsed)
+Write-Host ("Current Month : " + $chronoCurrentMonth.Elapsed)
+Write-Host ("Total         : " + $chronoTotal.Elapsed)
 
