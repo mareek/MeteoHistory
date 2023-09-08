@@ -44,8 +44,7 @@ function Out-GZip-File {
         $outputFileStream = New-Object System.IO.FileStream $outFile, ([IO.FileMode]::Create), ([IO.FileAccess]::Write), ([IO.FileShare]::None)
         $gzipStream = New-Object System.IO.Compression.GzipStream $outputFileStream, ([IO.Compression.CompressionMode]::Compress)
         $streamWriter = New-Object System.IO.StreamWriter $gzipStream
-        $joinedContent = $content | Join-String -Separator '`n'
-        $streamWriter.WriteLine($joinedContent)
+        $streamWriter.WriteLine(($content | Join-String -Separator "`n"))
         $streamWriter.flush()
     }
     finally {

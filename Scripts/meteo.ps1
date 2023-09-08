@@ -48,7 +48,7 @@ function Join-Files-Into-Archive {
     
     if ((-not (Test-Path $archiveFilePath)) -or (Get-Item $archiveFilePath).LastWriteTimeUtc -lt $lastDownloadDate) {
         Write-Host ("Creating archive " + (Split-Path $archiveFilePath -Leaf))
-        Compress-GZip-Files $filesToCompress  $archiveFilePath
+        Compress-GZip-Files $filesToCompress $archiveFilePath
     }
 }
 
@@ -71,13 +71,15 @@ function Split-Meteo-Archive {
             if ($null -eq $csvFileContent) {
                 $unzipedSrcFile = $srcFile + ".tmp"
                 Expand-GZip-File $srcFile $unzipedSrcFile
-                $csvFileContent = Get-Content -Path $unzipedSrcFile | group -AsHashTable -Property { $_.Split(";")[0] }
+                $rawCsvContent = Get-Content -Path $unzipedSrcFile
+                $headerLine = $rawCsvContent[0]
+                $csvFileContent = $rawCsvContent | group -AsHashTable -Property { $_.Split(";")[0] }
                 Remove-Item $unzipedSrcFile
             }
             
             New-Directory-If-Not-Exist $stationFileDir
             if ($csvFileContent.ContainsKey($station.ID)) {
-                Out-GZip-File $csvFileContent[$station.ID] $stationFilePath
+                Out-GZip-File (@($headerLine) + $csvFileContent[$station.ID]) $stationFilePath
             }
             else {
                 #Create an empty file to speed up further passes
