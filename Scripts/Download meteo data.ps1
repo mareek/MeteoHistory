@@ -57,6 +57,7 @@ foreach ($stationDir in Get-ChildItem $stationsDir -Directory) {
     $stationId = Split-Path $stationDir -Leaf
     Write-Host ("Copying monthly archives for station " + $stationId + " to final dir")
     $finalStationDir = Join-Path $finalDir $stationId
+    New-Directory-If-Not-Exist $finalStationDir
     foreach ($monthlyArchiveFile in Get-ChildItem $stationDir -Filter "synop.??.csv.gz") {
         Copy-File-If-Newer $monthlyArchiveFile $finalStationDir
     }
@@ -73,6 +74,7 @@ $ProgressPreference = $PreviousProgressPreference
 $dailyArchiveFile = Join-Daily-Files-Into-Archive -year $currentDate.Year -month $currentDate.Month -currentDay $currentDate.Day -dir $currentMonthDir
 
 Write-Host ("Copying partial current month to final dir")
+New-Directory-If-Not-Exist (Join-Path $finalDir "partial")
 Copy-File-If-Newer $dailyArchiveFile (Join-Path $finalDir "partial")
 
 Write-Host ("Cleanup previous daily files")
