@@ -1,5 +1,4 @@
 import { parseCsv } from "./csvParser";
-import { decompressResponse } from "./gzip";
 import type { CsvRow } from "./csvParser";
 import type { SynopMeasure, Station } from "@/data/meteoFranceTypes";
 
@@ -41,43 +40,32 @@ function readSynopFile(csvFileContent: string): SynopMeasure[] {
     return csvFile.rows.map(convertToSynopMeasure).filter((m): m is SynopMeasure => !!m);
 }
 
-async function downloadSynopFile(station: Station, year: number, month: number): Promise<SynopMeasure[] | undefined> {
-    const csvFileName = `synop.${year}${month.toLocaleString(undefined, { minimumIntegerDigits: 2 })}.csv`;
-    const url = `data/${station.ID}/${csvFileName}`;
-    const response = await fetch(url);
-    if (!response.ok)
-        return undefined;
-
-    const content = await response.text();
-    return readSynopFile(content);
-}
-
-async function downloadSynopMonthlyArchive(station: Station, month: number): Promise<SynopMeasure[] | undefined> {
+async function downloadSynopMonthlyArchive(station: Station, month: number): Promise<SynopMeasure[]> {
     const gzFileName = `synop.${month.toLocaleString(undefined, { minimumIntegerDigits: 2 })}.csv.gz`;
     const url = `data/${station.ID}/${gzFileName}`;
     const response = await fetch(url);
     if (!response.ok)
-        return undefined;
+        return [];
 
     const content = await response.text();
     if (!content)
-        return undefined
+        return [];
 
     return readSynopFile(content);
 }
 
-// This function does not work due to CORS on météo france's servers
-async function doawnloadSynopFileFromMeteoFrance(station: Station, csvFileName: string): Promise<SynopMeasure[] | undefined> {
-    const url = `https://donneespubliques.meteofrance.fr/donnees_libres/Txt/Synop/Archive/${csvFileName}.gz`
-
-    const response = await fetch(url, { mode: "cors" });
+async function downloadCurrentMonthFile(station: Station, year: number, month: number): Promise<SynopMeasure[]> {
+    const gzFileName = `synop.${year}${month.toLocaleString(undefined, { minimumIntegerDigits: 2 })}.csv.gz`;
+    const url = `data/partial/${gzFileName}`;
+    const response = await fetch(url);
     if (!response.ok)
-        return undefined;
+        return [];
 
-    const content = await decompressResponse(response);
+    const content = await response.text();
     if (!content)
-        return undefined
+        return [];
 
     return readSynopFile(content).filter(s => s.stationId === station.ID);
 }
-export { downloadSynopFile, downloadSynopMonthlyArchive };
+
+export { downloadSynopMonthlyArchive, downloadCurrentMonthFile };

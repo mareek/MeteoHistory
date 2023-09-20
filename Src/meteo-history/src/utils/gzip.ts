@@ -1,7 +1,6 @@
 import init, { decompressStringGzip } from "wasm-gzip";
 
 async function decompressResponse(response: Response): Promise<string | undefined> {
-    return await response.text();
     const globalObject: any = window;
     if (!!globalObject?.DecompressionStream) {
         return await decompressNative(await response.blob());
