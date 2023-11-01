@@ -1,4 +1,5 @@
 import { parseCsv } from "./csvParser";
+import { decompressResponse } from "./gzip"
 import type { CsvRow } from "./csvParser";
 import type { SynopMeasure, Station } from "@/data/meteoFranceTypes";
 
@@ -47,8 +48,8 @@ async function downloadSynopMonthlyArchive(station: Station, month: number): Pro
     if (!response.ok)
         return [];
 
-    const content = await response.text();
-    if (!content)
+    const content = await decompressResponse(response);
+    if (!content) 
         return [];
 
     return readSynopFile(content);
@@ -61,11 +62,12 @@ async function downloadCurrentMonthFile(station: Station, year: number, month: n
     if (!response.ok)
         return [];
 
-    const content = await response.text();
+    const content = await decompressResponse(response);
     if (!content)
         return [];
 
-    return readSynopFile(content).filter(s => s.stationId === station.ID);
+    const synopFile = readSynopFile(content);
+    return synopFile.filter(s => s.stationId === station.ID);
 }
 
 export { downloadSynopMonthlyArchive, downloadCurrentMonthFile };

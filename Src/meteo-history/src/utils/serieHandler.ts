@@ -46,11 +46,17 @@ function getYears(currentDate: Date): number[] {
 }
 
 async function downloadSeries(station: Station, currentDate: Date): Promise<temperatureSerie[]> {
+    console.log(`downloadSeries - station : [${station.ID}] "${station.Nom}"`);
     const month = currentDate.getMonth() + 1;
     const year = currentDate.getFullYear();
     const archivePromise = downloadSynopMonthlyArchive(station, month);
     const partialPromise = downloadCurrentMonthFile(station, year, month);
-    const measures = (await archivePromise).concat(await partialPromise);
+    const archive = await archivePromise;
+    const partial = await partialPromise;
+    console.log(`downloadSeries - archive count : ${archive.length}`);
+    console.log(`downloadSeries - partial count : ${partial.length}`);
+    
+    const measures = archive.concat(partial);
 
     return createSeries(getYears(currentDate), measures);
 }

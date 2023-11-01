@@ -8,15 +8,16 @@
     "test:unit": "vitest --environment jsdom",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "build-debug": "vite build --minify false"
   },
   "dependencies": {
     "chart.js": "^3.9.1",
     "lodash": "^4.17.21",
+    "pako": "^2.1.0",
     "vue": "^3.2.38",
     "vue-chartjs": "^4.1.2",
-    "vue-router": "^4.1.5",
-    "wasm-gzip": "^1.0.1"
+    "vue-router": "^4.1.5"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.4",
@@ -24,6 +25,7 @@
     "@types/jsdom": "^20.0.0",
     "@types/lodash": "^4.14.187",
     "@types/node": "^16.11.56",
+    "@types/pako": "^2.0.2",
     "@vitejs/plugin-vue": "^3.0.3",
     "@vue/eslint-config-prettier": "^7.0.0",
     "@vue/eslint-config-typescript": "^11.0.0",

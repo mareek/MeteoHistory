@@ -5,7 +5,7 @@ import _ from "lodash";
 import type { FeatureCollection, Station } from "@/data/meteoFranceTypes";
 import type { Coordinates } from "@/utils/geoUtils"
 
-const defaultStationId = "07255"; // Bourges, at the center of France
+const defaultStationId = "07149"; // Orly, near Paris
 
 const props = defineProps<{
     selectedStation: Station | undefined,
@@ -26,7 +26,11 @@ onMounted(async () => {
     readStations.sort((a, b) => a.Nom.localeCompare(b.Nom))
     stations.value = readStations.filter(isInFranceMetropolitaine);
 
-    locationPromise.then(setCoordinates).catch(() => selectedStationId.value = defaultStationId);
+    locationPromise.then(setCoordinates)
+        .catch((error) => {
+            selectedStationId.value = defaultStationId;
+            console.log(`Error fetching coordinaes : ${error.message}`);
+        });
 });
 
 const stations = ref<Station[]>([]);
