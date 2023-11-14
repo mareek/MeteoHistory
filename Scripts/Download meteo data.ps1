@@ -1,3 +1,5 @@
+param([string] $finalDir)
+
 . "$PSScriptRoot\meteo.ps1"
 
 $chronoTotal = [System.Diagnostics.Stopwatch]::StartNew()
@@ -6,6 +8,10 @@ $dataDir = Join-Path $PSScriptRoot ".." "Data" -Resolve
 $archiveDir = Join-Path $dataDir "Archives"
 $stationsDir = Join-Path $dataDir "Stations"
 $currentMonthDir = Join-Path $dataDir "CurrentMonth"
+
+if (-not $finalDir) {
+    $finalDir = Join-Path $PSScriptRoot ".." "Src" "meteo-history" "public" "data" -Resolve
+}
 
 New-Directory-If-Not-Exist $dataDir
 New-Directory-If-Not-Exist $archiveDir
@@ -49,8 +55,6 @@ foreach ($stationDir in Get-ChildItem $stationsDir -Directory) {
     }
 }
 $chronoArchive.Stop()
-
-$finalDir = Join-Path $PSScriptRoot ".." "Src" "meteo-history" "public" "data" -Resolve
 
 $chronoCopy = [System.Diagnostics.Stopwatch]::StartNew()
 foreach ($stationDir in Get-ChildItem $stationsDir -Directory) {
