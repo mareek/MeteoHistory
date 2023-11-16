@@ -44,12 +44,12 @@ function readSynopFile(csvFileContent: string): SynopMeasure[] {
 async function downloadSynopMonthlyArchive(station: Station, month: number): Promise<SynopMeasure[]> {
     const gzFileName = `synop.${month.toLocaleString(undefined, { minimumIntegerDigits: 2 })}.csv.gz`;
     const url = `data/${station.ID}/${gzFileName}`;
-    const response = await fetch(url);
+    const response = await fetch(url, { cache: "no-cache" });
     if (!response.ok)
         return [];
 
     const content = await decompressResponse(response);
-    if (!content) 
+    if (!content)
         return [];
 
     return readSynopFile(content);
@@ -58,7 +58,7 @@ async function downloadSynopMonthlyArchive(station: Station, month: number): Pro
 async function downloadCurrentMonthFile(station: Station, year: number, month: number): Promise<SynopMeasure[]> {
     const gzFileName = `synop.${year}${month.toLocaleString(undefined, { minimumIntegerDigits: 2 })}.csv.gz`;
     const url = `data/partial/${gzFileName}`;
-    const response = await fetch(url);
+    const response = await fetch(url, { cache: "no-cache" });
     if (!response.ok)
         return [];
 

@@ -6,7 +6,7 @@ if (-not $githubIoRootDir) {
 }
 
 $githubIoMeteoDir = Join-Path $githubIoRootDir "meteo" "data"
-. "$PSScriptRoot\Download meteo data.ps1" -finalDir $githubIoMeteoDir
+."$PSScriptRoot\Download meteo data.ps1" -finalDir $githubIoMeteoDir
 
 # Update GitHub.io repository
 $previousLocation = Get-Location
