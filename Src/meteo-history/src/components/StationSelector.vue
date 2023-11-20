@@ -43,6 +43,21 @@ function setCoordinates(coordinates: Coordinates | undefined) {
     selectedStationId.value = nearestStation?.ID ?? defaultStationId;
 }
 
+function getUserFriendlyName(station: Station) {
+    switch (station.Nom) {
+        case "ORLY":
+            return "Paris - Orly";
+        case "ALENCON":
+            return "Alençon";
+        case "CLERMONT-FD":
+            return "Clermont-Ferrand";
+        case "MONT-DE-MARSAN":
+            return "Mont-de-Marsan";
+        default:
+            return station.Nom.split(' ').map(s => s.split('-').map(_.capitalize).join(' - ')).join(' ');
+    }
+}
+
 const emit = defineEmits(['update:selectedStation']);
 
 watchEffect(() => {
@@ -57,6 +72,6 @@ watchEffect(() => {
 
 <template>
     <select v-model="selectedStationId">
-        <option v-for="station in stations" :value="station.ID">{{ station.Nom }}</option>
+        <option v-for="station in stations" :value="station.ID">{{ getUserFriendlyName(station) }}</option>
     </select>
 </template>
