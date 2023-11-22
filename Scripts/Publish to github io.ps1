@@ -9,13 +9,14 @@ $githubIoMeteoDir = Join-Path $githubIoRootDir "meteo" "data"
 
 $previousLocation = Get-Location
 Set-Location -Path $githubIoRootDir
-$currentDate = (Get-Date).ToString("yyyy-MM-dd")
-if ((git log --pretty=oneline --max-count=10 | Select-String "\[Auto\] Updated meteo data \($currentDate\)").Count -eq 0) {
+$currentDate = Get-Date
+if ((git log --pretty=oneline --max-count=10 | Select-String "\[Auto\] Updated meteo data \($($currentDate.ToString("yyyy-MM-dd"))\)").Count -eq 0) {
     ."$PSScriptRoot\Download meteo data.ps1" -finalDir $githubIoMeteoDir
 
     # Update GitHub.io repository
     Write-Host "Update github.io site"
-    git commit --all -m "[Auto] Updated meteo data ($currentDate)"
+    git add .
+    git commit --all -m "[Auto] Updated meteo data ($($currentDate.ToString("yyyy-MM-dd")))"
     git push
 }
 else {
