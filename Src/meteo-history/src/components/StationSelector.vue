@@ -92,7 +92,7 @@ watchEffect(() => {
             <option v-for="station in stations" :value="station.ID">{{ getUserFriendlyName(station) }}</option>
         </select>
         <button @click="SetStationByLocation">
-            <img src="img/position.png" class="location-button" />
+            <img src="/src/assets/img/position.png" class="location-button" />
         </button>
     </div>
 </template>
