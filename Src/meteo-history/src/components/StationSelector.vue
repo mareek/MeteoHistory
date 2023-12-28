@@ -5,7 +5,10 @@ import _ from "lodash";
 import type { FeatureCollection, Station } from "@/data/meteoFranceTypes";
 import type { Coordinates } from "@/utils/geoUtils"
 
-const defaultStationId = "07149"; // Orly, near Paris
+const stationIdStorageKey = "meteo-history-selected-station-id";
+
+const stations = ref<Station[]>([]);
+const selectedStationId = ref<string | undefined>();
 
 const props = defineProps<{
     selectedStation: Station | undefined,
@@ -18,29 +21,40 @@ function isInFranceMetropolitaine(station: Station) {
 }
 
 onMounted(async () => {
-    const locationPromise = getLocation();
-
     const response = await fetch(props.sourceFileUrl);
     const featureCollection: FeatureCollection = await response.json();
     const readStations = featureCollection.features.map(f => f.properties);
     readStations.sort((a, b) => a.Nom.localeCompare(b.Nom))
     stations.value = readStations.filter(isInFranceMetropolitaine);
 
-    locationPromise.then(setCoordinates)
-        .catch((error) => {
-            selectedStationId.value = defaultStationId;
-            console.log(`Error fetching coordinaes : ${error.message}`);
-        });
+    const storedStationId = localStorage.getItem(stationIdStorageKey);
+    if (storedStationId) {
+        selectedStationId.value = storedStationId;
+    } else {
+        const defaultStationId = "07149"; // Orly, near Paris
+        await SetStationByLocation(defaultStationId);
+    }
 });
 
-const stations = ref<Station[]>([]);
-const selectedStationId = ref<string | undefined>();
+async function SetStationByLocation(defaultStationId: string | undefined) {
+    try {
+        const coordinates = await getLocation();
+        if (!coordinates)
+            return;
+        const nearestStation = _.orderBy(stations.value, s => computeDistance(s, coordinates))[0];
+        if (nearestStation) {
+            selectedStationId.value = nearestStation.ID;
+        }
+    } catch (error: any) {
+        console.log(`Error fetching coordinaes : ${error.message}`);
+    }
 
-function setCoordinates(coordinates: Coordinates | undefined) {
-    if (!coordinates)
-        return;
-    const nearestStation = _.orderBy(stations.value, s => computeDistance(s, coordinates))[0];
-    selectedStationId.value = nearestStation?.ID ?? defaultStationId;
+    if (defaultStationId && !selectedStationId.value) {
+        selectedStationId.value = defaultStationId;
+    }
+}
+
+function setNearestStation(coordinates: Coordinates | undefined) {
 }
 
 function getUserFriendlyName(station: Station) {
@@ -62,7 +76,8 @@ const emit = defineEmits(['update:selectedStation']);
 
 watchEffect(() => {
     if (selectedStationId.value && stations.value && stations.value.length) {
-        const station = stations.value.find(s => s.ID === selectedStationId.value)
+        const station = stations.value.find(s => s.ID === selectedStationId.value);
+        localStorage.setItem(stationIdStorageKey, selectedStationId.value);
         emit('update:selectedStation', station)
     } else {
         emit('update:selectedStation', null)
@@ -71,7 +86,35 @@ watchEffect(() => {
 </script>
 
 <template>
-    <select v-model="selectedStationId">
-        <option v-for="station in stations" :value="station.ID">{{ getUserFriendlyName(station) }}</option>
-    </select>
+    <div class="flex-container">
+        <span>Station : </span>
+        <select v-model="selectedStationId">
+            <option v-for="station in stations" :value="station.ID">{{ getUserFriendlyName(station) }}</option>
+        </select>
+        <button @click="SetStationByLocation">
+            <img src="img/position.png" class="location-button" />
+        </button>
+    </div>
 </template>
+
+<style scoped>
+.flex-container {
+    display: flex;
+    align-items: center;
+}
+
+.flex-container>* {
+    margin-right: 0.5em;
+}
+
+button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.location-button {
+    height: 1em;
+    width: 1em;
+}
+</style>

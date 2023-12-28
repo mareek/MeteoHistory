@@ -12,7 +12,6 @@ const selectedDate = computed(() => new Date(new Date().getFullYear(), selectedM
 
 <template>
   <div>
-    <span>Station : </span>
     <StationSelector v-model:selectedStation="selectedStation" sourceFileUrl="data/postesSynop.json" />
   </div>
   <div>
