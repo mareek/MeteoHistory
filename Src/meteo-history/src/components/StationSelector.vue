@@ -3,7 +3,6 @@ import { ref, onMounted, watchEffect } from "vue";
 import { computeDistance, getLocation } from "@/utils/geoUtils"
 import _ from "lodash";
 import type { FeatureCollection, Station } from "@/data/meteoFranceTypes";
-import type { Coordinates } from "@/utils/geoUtils"
 
 const stationIdStorageKey = "meteo-history-selected-station-id";
 
@@ -36,7 +35,7 @@ onMounted(async () => {
     }
 });
 
-async function SetStationByLocation(defaultStationId: string | undefined) {
+async function SetStationByLocation(defaultStationId: string | undefined = undefined) {
     try {
         const coordinates = await getLocation();
         if (!coordinates)
@@ -52,9 +51,6 @@ async function SetStationByLocation(defaultStationId: string | undefined) {
     if (defaultStationId && !selectedStationId.value) {
         selectedStationId.value = defaultStationId;
     }
-}
-
-function setNearestStation(coordinates: Coordinates | undefined) {
 }
 
 function getUserFriendlyName(station: Station) {
@@ -91,7 +87,7 @@ watchEffect(() => {
         <select v-model="selectedStationId">
             <option v-for="station in stations" :value="station.ID">{{ getUserFriendlyName(station) }}</option>
         </select>
-        <button @click="SetStationByLocation">
+        <button @click="async () => await SetStationByLocation()">
             <img src="/src/assets/img/position.png" class="location-button" />
         </button>
     </div>
