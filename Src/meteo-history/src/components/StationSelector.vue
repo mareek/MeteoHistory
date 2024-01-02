@@ -8,6 +8,7 @@ const stationIdStorageKey = "meteo-history-selected-station-id";
 
 const stations = ref<Station[]>([]);
 const selectedStationId = ref<string | undefined>();
+const showMap = ref<boolean>(false);
 
 const props = defineProps<{
     selectedStation: Station | undefined,
@@ -82,24 +83,30 @@ watchEffect(() => {
 </script>
 
 <template>
-    <div class="flex-container">
+    <div class="flex-horizontal-stack-panel">
         <span>Station : </span>
         <select v-model="selectedStationId">
             <option v-for="station in stations" :value="station.ID">{{ getUserFriendlyName(station) }}</option>
         </select>
-        <button @click="async () => await SetStationByLocation()">
-            <img src="/src/assets/img/position.png" class="location-button" />
+        <button @click="async () => await SetStationByLocation()" title="Sélectionner la station météo la plus proche">
+            <img src="/src/assets/img/position.png" />
+        </button>
+        <button @click="() => showMap = !showMap" title="Selectionner la sation météo sur une carte">
+            <img src="/src/assets/img/map.png" />
         </button>
     </div>
+    <Transition name="fade">
+        <img src="/src/assets/img/map.png" v-if="showMap" />
+    </Transition>
 </template>
 
 <style scoped>
-.flex-container {
+.flex-horizontal-stack-panel {
     display: flex;
     align-items: center;
 }
 
-.flex-container>* {
+.flex-horizontal-stack-panel>* {
     margin-right: 0.5em;
 }
 
@@ -109,8 +116,18 @@ button {
     justify-content: center;
 }
 
-.location-button {
+button>img {
     height: 1em;
     width: 1em;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 </style>
