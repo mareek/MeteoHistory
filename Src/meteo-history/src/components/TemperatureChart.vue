@@ -20,18 +20,24 @@ const labels = computed(() =>
     props.backgroundTemperatures?.length
     && props.backgroundTemperatures[0]
         .dailyTemperatures
-        .map(dt => new Date(2000, dt.month - 1, dt.day).toLocaleString('default', { day: "numeric", month: 'long' })));
+        .map(dt => new Date(2000, dt.month - 1, dt.day).toLocaleString('fr-FR', { day: "numeric", month: 'long' })));
 
 function CreateDatasets(serie: temperatureSerie, isForeground: boolean): ChartDataset[] {
     const datasetMin: ChartDataset = {
         label: `${serie.label} Min`,
         borderColor: isForeground ? minForegroundColor : minBackgroundColor,
+        borderWidth: isForeground ? 8 : 6,
+        pointBorderWidth: 1,
+        pointRadius: 5,
         data: serie.dailyTemperatures.map(d => d.min)
     };
 
     const datasetMax: ChartDataset = {
         label: `${serie.label} Max`,
         borderColor: isForeground ? maxForegroundColor : maxBackgroundColor,
+        borderWidth: isForeground ? 8 : 6,
+        pointBorderWidth: 1,
+        pointRadius: 5,
         data: serie.dailyTemperatures.map(d => d.max)
     };
 
@@ -54,11 +60,7 @@ const chartData = computed((): any => ({
 
 const chartOptions: any = {
     elements: {
-        line: {
-            tension: 0.3,
-            borderWidth: 7,
-        },
-        point: { pointRadius: 5 }
+        line: { tension: 0.3 }
     },
     plugins: { legend: { display: false } },
     maintainAspectRatio: false,
@@ -74,7 +76,7 @@ const chartOptions: any = {
 <style>
 .chart {
     width: 95vw;
-    height: 80vh;
+    height: 50vw;
     background-color: antiquewhite;
     color: black;
 }
