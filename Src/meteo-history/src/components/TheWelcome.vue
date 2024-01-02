@@ -15,10 +15,10 @@ const selectedDate = computed(() => new Date(new Date().getFullYear(), selectedM
     <StationSelector v-model:selectedStation="selectedStation" sourceFileUrl="data/postesSynop.json" />
   </div>
   <div>
-    <span>Month : </span>
+    <span>Mois : </span>
     <select v-model="selectedMonth">
       <option v-for="month in Array(12).fill(0).map((_, i) => i)" :value="month">
-        {{ new Date(2000, month, 1).toLocaleString('default', { month: 'long' }) }}
+        {{ new Date(2000, month, 1).toLocaleString('fr-FR', { month: 'long' }) }}
       </option>
     </select>
   </div>

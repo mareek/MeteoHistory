@@ -29,7 +29,7 @@ const foregroundSerie = computed(() => series.value.filter(s => s.label === fore
 </script>
 
 <template>
-    <span>Year : </span>
+    <span>Année : </span>
     <select v-model="foregroundSerieLabel">
         <option v-for="serie in seriesLabels">{{ serie }}</option>
     </select>
