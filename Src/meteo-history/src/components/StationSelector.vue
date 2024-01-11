@@ -3,6 +3,7 @@ import { ref, onMounted, watchEffect } from "vue";
 import { computeDistance, getLocation } from "@/utils/geoUtils"
 import _ from "lodash";
 import type { FeatureCollection, Station } from "@/data/meteoFranceTypes";
+import StationMap from "./StationMap.vue";
 
 const stationIdStorageKey = "meteo-history-selected-station-id";
 
@@ -75,10 +76,12 @@ watchEffect(() => {
     if (selectedStationId.value && stations.value && stations.value.length) {
         const station = stations.value.find(s => s.ID === selectedStationId.value);
         localStorage.setItem(stationIdStorageKey, selectedStationId.value);
-        emit('update:selectedStation', station)
+        emit('update:selectedStation', station);
     } else {
-        emit('update:selectedStation', null)
+        emit('update:selectedStation', null);
     }
+
+    showMap.value = false;
 });
 </script>
 
@@ -96,7 +99,7 @@ watchEffect(() => {
         </button>
     </div>
     <Transition name="fade">
-        <img src="/src/assets/img/map.png" v-if="showMap" />
+        <StationMap v-if="showMap" :stations="stations" @update-selected-station-id="(id) => selectedStationId = id" />
     </Transition>
 </template>
 
@@ -123,7 +126,7 @@ button>img {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: all 0.5s ease;
+    transition: all 0.1s ease;
 }
 
 .fade-enter-from,

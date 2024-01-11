@@ -12,7 +12,9 @@
     "build-debug": "vite build --minify false"
   },
   "dependencies": {
+    "@vue-leaflet/vue-leaflet": "^0.10.1",
     "chart.js": "^3.9.1",
+    "leaflet": "^1.9.4",
     "lodash": "^4.17.21",
     "pako": "^2.1.0",
     "vue": "^3.2.38",
