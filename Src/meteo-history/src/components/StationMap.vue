@@ -3,6 +3,7 @@ import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LMarker, LIcon } from "@vue-leaflet/vue-leaflet";
 import { ref } from "vue";
 import type { Station } from "@/data/meteoFranceTypes";
+import meteoFranceLogoUrl from "@/assets/img/meteo-france-logo.png"
 
 const zoom = ref(6);
 
@@ -20,7 +21,7 @@ const emit = defineEmits(['updateSelectedStationId']);
             </l-tile-layer>
             <l-marker v-for="station in stations" :lat-lng="[station.Latitude, station.Longitude]"
                 @click="() => emit('updateSelectedStationId', station.ID)">
-                <l-icon icon-url="/src/assets/img/meteo-france-logo.png" :icon-size="[20, 20]" />
+                <l-icon :icon-url="meteoFranceLogoUrl" :icon-size="[20, 20]" />
             </l-marker>
         </l-map>
     </div>
