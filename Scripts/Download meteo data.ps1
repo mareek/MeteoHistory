@@ -13,7 +13,6 @@ if (-not $finalDir) {
     $finalDir = Join-Path $PSScriptRoot ".." "Src" "meteo-history" "public" "data" -Resolve
 }
 
-New-Directory-If-Not-Exist $dataDir
 New-Directory-If-Not-Exist $archiveDir
 New-Directory-If-Not-Exist $stationsDir
 New-Directory-If-Not-Exist $currentMonthDir
@@ -37,7 +36,7 @@ $stationFilePath = Join-Path $dataDir "postesSynop.json"
 $stationJson = Get-Content $stationFilePath | ConvertFrom-Json
 $stations = $stationJson.features | select -ExpandProperty properties
 
-$csvFiles = Get-ChildItem -Path $archiveDir | sort LastWriteTime -Descending
+$csvFiles = Get-ChildItem -Path $archiveDir | Sort-Object LastWriteTime -Descending
 
 $chronoSplit = [System.Diagnostics.Stopwatch]::StartNew()
 foreach ($csvFile in $csvFiles) {
