@@ -5,6 +5,9 @@ import _ from "lodash";
 import type { FeatureCollection, Station } from "@/data/meteoFranceTypes";
 import StationMap from "./StationMap.vue";
 
+import positionIconUrl from "@/assets/img/map.png"
+import mapIconUrl from "@/assets/img/map.png"
+
 const stationIdStorageKey = "meteo-history-selected-station-id";
 
 const stations = ref<Station[]>([]);
@@ -92,10 +95,10 @@ watchEffect(() => {
             <option v-for="station in stations" :value="station.ID">{{ getUserFriendlyName(station) }}</option>
         </select>
         <button @click="async () => await SetStationByLocation()" title="Sélectionner la station météo la plus proche">
-            <img src="/src/assets/img/position.png" />
+            <img :src="positionIconUrl" />
         </button>
         <button @click="() => showMap = !showMap" title="Selectionner la sation météo sur une carte">
-            <img src="/src/assets/img/map.png" />
+            <img :src="mapIconUrl" />
         </button>
     </div>
     <Transition name="fade">
