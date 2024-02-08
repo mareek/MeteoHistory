@@ -5,7 +5,7 @@ import _ from "lodash";
 import type { FeatureCollection, Station } from "@/data/meteoFranceTypes";
 import StationMap from "./StationMap.vue";
 
-import positionIconUrl from "@/assets/img/map.png"
+import positionIconUrl from "@/assets/img/position.png"
 import mapIconUrl from "@/assets/img/map.png"
 
 const stationIdStorageKey = "meteo-history-selected-station-id";
